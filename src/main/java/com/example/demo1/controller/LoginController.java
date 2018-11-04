@@ -1,5 +1,6 @@
 package com.example.demo1.controller;
 
+import java.util.HashMap;
 import java.util.List;
 
 import java.io.BufferedReader;
@@ -28,9 +29,12 @@ public class LoginController {
         String appid = "wxe9f348c2692ffe5c";
         String secret = "4461a9c9bedbf8b0cae7f1549575e9d4";
         String param = "appid=" +appid+"&secret="+secret+"&js_code=" + (String)code +"&grant_type=authorization_code";
-        String resu =  GetRequest.sendGet(url, param);
-        System.out.println(resu);
-        return resu;
+        String resu =  GetRequest.sendGet(url, param);//获取的数据包
+        System.out.println(resu);//测试
+        //Access_token access_token = new Access_token();
+        //String access = access_token.get(appid, secret);//需要获取access token,类修改后可以增加判断
+        //String user_info = GetRequest.sendGet()
+        return "done";
     }
 }
 
@@ -38,6 +42,7 @@ class GetRequest {
 
     public static String sendGet(String url, String param) {
         String result = "";
+        Map<String, List<String>> map = new HashMap<String, List<String>>();
         BufferedReader in = null;
         try {
             String urlNameString = url + "?" + param;
@@ -52,7 +57,7 @@ class GetRequest {
             // 建立实际的连接
             connection.connect();
             // 获取所有响应头字段
-            Map<String, List<String>> map = connection.getHeaderFields();
+            map = connection.getHeaderFields();
             // 遍历所有的响应头字段
             for (String key : map.keySet()) {
                 System.out.println(key + "--->" + map.get(key));
@@ -79,5 +84,42 @@ class GetRequest {
             }
         }
         return result;
+    }
+}
+
+class Access_token{//获取access_token
+    // https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140183
+    // 1.需要增加判断是否有效函数
+    // 2.将类设置成单例模式
+    private static boolean live = false;
+
+    public static String get(String appid, String secret){
+        String url = "https://api.weixin.qq.com/cgi-bin/token";
+        String params = "grant_type=client_credential&appid=" + "&secret=" + secret;
+        Map<String, List<String>> map = new HashMap<String, List<String>>();
+        String reus = GetRequest.sendGet(url, params);
+        //从reus到map的映射
+        live = true;
+        return map.get("access_token").get(0);
+    }
+
+    public static boolean living(){
+        return live;
+    }
+}
+
+class User
+{//https://mp.weixin.qq.com/wiki?action=doc&id=mp1421140839
+    // 绑定公众号后唯一
+    Map<String, List<String>> info = new HashMap<String, List<String>>();
+    public void get(String acccess_token, String openid){
+        String url = "https://api.weixin.qq.com/cgi-bin/user/info";
+        String params = "access_token=" + acccess_token + "&openid=" + openid;
+        String info_string = GetRequest.sendGet(url, params);
+        //从string到map
+    }
+
+    public String union_id(){
+        return info.get("unionid").get(0);
     }
 }
